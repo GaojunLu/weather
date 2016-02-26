@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="50dp"
+    android:orientation="horizontal"
+    android:background="@drawable/popup_inline_error_am"
+    android:gravity="center_vertical" >
+
+    <TextView
+        android:id="@+id/tv_auto"
+        android:clickable="true"
+        android:background="@drawable/setting_bg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="20"
+        android:text="自动选择"
+        android:gravity="center" />
+    <View
+        android:layout_width="1dp"
+        android:layout_height="20dp"
+        android:layout_weight="1"
+        android:layout_centerHorizontal="true"
+        android:background="#aa000000" 
+        android:gravity="center" />
+
+
+    <TextView
+        android:id="@+id/tv_choise"
+        android:clickable="true"
+        android:background="@drawable/setting_bg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="20"
+        android:text="手动选择" 
+        android:gravity="center" />
+
+</LinearLayout>

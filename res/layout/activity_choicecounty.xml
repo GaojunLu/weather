@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical" 
+    android:background="#E3F3F9">
     
     <include 
         layout="@layout/title"/>
@@ -23,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="3"
             android:textSize="18sp"
-            android:background="@drawable/btn_dropdown_disabled"/>
+            android:background="@drawable/btn_dropdown_pressed"/>
     </LinearLayout>
     <LinearLayout 
         android:layout_width="match_parent"
@@ -42,7 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="3"
             android:textSize="18sp"
-            android:background="@drawable/btn_dropdown_disabled"/>
+            android:background="@drawable/btn_dropdown_pressed"/>
     </LinearLayout>
     <LinearLayout 
         android:layout_width="match_parent"
@@ -61,15 +62,18 @@
             android:layout_height="wrap_content"
             android:layout_weight="3"
             android:textSize="18sp"
-            android:background="@drawable/btn_dropdown_disabled"/>
+            android:background="@drawable/btn_dropdown_pressed"/>
     </LinearLayout>
     
-    <Button 
+    <TextView 
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:text="完成"
         android:textSize="18sp"
         android:onClick="ok"
-        android:layout_gravity="center_horizontal"/>
+        android:clickable="true"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:background="@drawable/bt_bg"/>
 
 </LinearLayout>
