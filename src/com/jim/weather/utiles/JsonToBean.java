@@ -6,7 +6,11 @@ import org.json.JSONObject;
 
 import com.google.gson.Gson;
 import com.jim.weather.bean.WeatherInfo;
-
+/**
+ * ½âÎöjson
+ * @author Administrator
+ *
+ */
 public class JsonToBean {
 	public static WeatherInfo getWeatherInfo(String json){
 		JSONObject jsonObject;

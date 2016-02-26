@@ -1,7 +1,11 @@
 package com.jim.weather.bean;
 
 import java.util.ArrayList;
-
+/**
+ * 用于存储解析json得到的天气信息
+ * @author Administrator
+ *
+ */
 public class WeatherInfo {
 	public Basic basic;
 	public ArrayList<Daily_forecast> daily_forecast;

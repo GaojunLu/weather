@@ -71,12 +71,5 @@
         android:textSize="18sp"
         android:onClick="ok"
         android:layout_gravity="center_horizontal"/>
-    <Button 
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:text="自动选择"
-        android:textSize="18sp"
-        android:onClick="auto"
-        android:layout_gravity="center_horizontal"/>
 
 </LinearLayout>

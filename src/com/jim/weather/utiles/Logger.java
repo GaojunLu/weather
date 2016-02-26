@@ -1,7 +1,11 @@
 package com.jim.weather.utiles;
 
 import android.util.Log;
-
+/**
+ * 日志工具类，修改CURRENT控制全局打印
+ * @author Administrator
+ *
+ */
 public class Logger {
 	static final int VERBOSE = 1;
 	static final int DEBUG = 2;
@@ -10,27 +14,27 @@ public class Logger {
 	static final int ERROR = 5;
 	private static final int CURRENT = VERBOSE;
 	public static void v(String tag, String msg){
-		if(CURRENT>=VERBOSE){
+		if(CURRENT<=VERBOSE){
 			Log.v(tag, msg);
 		}
 	}
 	public static void d(String tag, String msg){
-		if(CURRENT>=DEBUG){
+		if(CURRENT<=DEBUG){
 			Log.d(tag, msg);
 		}
 	}
 	public static void w(String tag, String msg){
-		if(CURRENT>=WARM){
+		if(CURRENT<=WARM){
 			Log.w(tag, msg);
 		}
 	}
 	public static void e(String tag, String msg){
-		if(CURRENT>=ERROR){
+		if(CURRENT<=ERROR){
 			Log.e(tag, msg);
 		}
 	}
 	public static void i(String tag, String msg){
-		if(CURRENT>=INFO){
+		if(CURRENT<=INFO){
 			Log.i(tag, msg);
 		}
 	}
