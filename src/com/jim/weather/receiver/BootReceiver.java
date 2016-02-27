@@ -15,8 +15,9 @@ public class BootReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		// TODO Auto-generated method stub
 		Logger.i(tag, "¿ª»úÆô¶¯");
-		Intent service = new Intent(context, AutoUpdateService.class);
-		context.startService(service);
+		if (context.getSharedPreferences("config", Context.MODE_PRIVATE).getInt("autoupdate", 0)!=0) {
+			Intent service = new Intent(context, AutoUpdateService.class);
+			context.startService(service);
+		}
 	}
-
 }

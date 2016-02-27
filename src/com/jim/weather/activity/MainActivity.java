@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -94,6 +97,8 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 	private RotateAnimation rotate;
 	private RelativeLayout setting_autoupdate;
 	private LinearLayout popView;
+	private AutoUpdateReciever autoUpdateReciever;
+	private TextView tv_autoupdate_desc;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -125,6 +130,7 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 		iv_menu = (ImageView) findViewById(R.id.iv_menu);
 		iv_refresh = (ImageView) findViewById(R.id.iv_refresh);
 		tv_updatetime = (TextView) findViewById(R.id.tv_updatetime);
+		tv_autoupdate_desc = (TextView) findViewById(R.id.tv_autoupdate_desc);
 		// 侧边栏
 		slidingMenu = getSlidingMenu();
 		slidingMenu.setBehindOffset(getWindowManager().getDefaultDisplay()
@@ -145,6 +151,29 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 		city = getSharedPreferences("config", MODE_PRIVATE).getString("city",
 				null);
 		upDateWeatherInfoFromSD(city, county);
+		switch (getSharedPreferences("config", MODE_PRIVATE).getInt("autoupdate", 0)) {
+		case 0:
+			tv_autoupdate_desc.setText("关闭");
+			break;
+		case 1:
+			tv_autoupdate_desc.setText("1小时");
+			break;
+		case 3:
+			tv_autoupdate_desc.setText("3小时");
+			break;
+		case 6:
+			tv_autoupdate_desc.setText("6小时");
+			break;
+		case 12:
+			tv_autoupdate_desc.setText("12小时");
+			break;
+		}
+		//注册更新广播
+		
+		autoUpdateReciever = new AutoUpdateReciever();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction("com.jim.weather.autoupdate");
+		registerReceiver(autoUpdateReciever, filter );
 	}
 
 	/**
@@ -190,7 +219,6 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 			getCity();
 			return;
 		}
-		HttpUtils httpUtils = new HttpUtils();
 		final String cityid = DbUtiles.getCityid(this, city, county);
 		if (cityid == null) {
 			Toast.makeText(MainActivity.this, "自动获取地址失败，请手动选择", 0).show();
@@ -200,6 +228,7 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 					.putString("city", null).commit();
 			return;
 		}
+		HttpUtils httpUtils = new HttpUtils();
 		String url = URL.WEATHER_URL + "?cityid=" + cityid + "&key="
 				+ URL.key_weather;
 		httpUtils.send(HttpMethod.GET, url, new RequestCallBack<String>() {
@@ -212,7 +241,7 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 						.edit()
 						.putString(
 								"updatetime",
-								(String) DateFormat.format("MM月dd日 HH:mm",
+								(String) DateFormat.format("MM月dd日 HH:mm:ss",
 										System.currentTimeMillis())).commit();
 				upDateUI(responseInfo.result);
 				Logger.i(TAG, "从网络读取数据");
@@ -306,24 +335,39 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 			break;
 		// 以下设置自动更新气泡的按钮
 		case R.id.tv_off:
+			getSharedPreferences("config", MODE_PRIVATE).edit().putInt("autoupdate", 0).commit();
 			stopService(new Intent(MainActivity.this, AutoUpdateService.class));
 			popupWindow.dismiss();
+			slidingMenu.toggle();
+			tv_autoupdate_desc.setText("关闭");
 			break;
 		case R.id.tv_1h:
+			getSharedPreferences("config", MODE_PRIVATE).edit().putInt("autoupdate", 1).commit();
 			startService(new Intent(MainActivity.this, AutoUpdateService.class));
 			popupWindow.dismiss();
+			slidingMenu.toggle();
+			tv_autoupdate_desc.setText("1小时");
 			break;
 		case R.id.tv_3h:
+			getSharedPreferences("config", MODE_PRIVATE).edit().putInt("autoupdate", 3).commit();
 			startService(new Intent(MainActivity.this, AutoUpdateService.class));
 			popupWindow.dismiss();
+			slidingMenu.toggle();
+			tv_autoupdate_desc.setText("3小时");
 			break;
 		case R.id.tv_6h:
+			getSharedPreferences("config", MODE_PRIVATE).edit().putInt("autoupdate", 6).commit();
 			startService(new Intent(MainActivity.this, AutoUpdateService.class));
 			popupWindow.dismiss();
+			slidingMenu.toggle();
+			tv_autoupdate_desc.setText("6小时");
 			break;
 		case R.id.tv_12h:
+			getSharedPreferences("config", MODE_PRIVATE).edit().putInt("autoupdate", 12).commit();
 			startService(new Intent(MainActivity.this, AutoUpdateService.class));
 			popupWindow.dismiss();
+			slidingMenu.toggle();
+			tv_autoupdate_desc.setText("12小时");
 			break;
 		}
 	}
@@ -414,6 +458,7 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 			popupWindow.dismiss();
 			popupWindow = null;
 		}
+		unregisterReceiver(autoUpdateReciever);
 	}
 
 	/**
@@ -471,5 +516,20 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 			getSharedPreferences("config", MODE_PRIVATE).edit()
 					.putString("city", city).commit();
 		}
+	}
+	/**
+	 * 接收更新广播
+	 * @author Administrator
+	 *
+	 */
+	class AutoUpdateReciever extends BroadcastReceiver{
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			upDateWeatherInfoFromSD(city, county);
+			Toast.makeText(MainActivity.this, "完成了自动更新", 0).show();
+		}
+		
 	}
 }
