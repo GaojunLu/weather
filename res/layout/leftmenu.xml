@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#735A4F" >
+    android:background="@drawable/left_bg" >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,11 +19,10 @@
             android:textSize="20sp" 
             android:layout_marginBottom="20dp"/>
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/setting_changecounty"
             android:layout_width="match_parent"
             android:layout_height="35dp"
-            android:orientation="horizontal" 
             android:background="@drawable/setting_bg"
             android:gravity="center_vertical"
             android:clickable="true">
@@ -34,14 +33,43 @@
                 android:src="@drawable/ic_action_location" />
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
                 android:gravity="center"
                 android:text="切换城市"
                 android:textColor="#fff" 
                 android:textSize="16sp"/>
-        </LinearLayout>
+        </RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/setting_autoupdate"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:background="@drawable/setting_bg"
+            android:gravity="center_vertical"
+            android:clickable="true">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_menu_refresh" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="自动更新"
+                android:textColor="#fff" 
+                android:textSize="16sp"/>
+            <TextView 
+                android:id="@+id/tv_autoupdate_desc"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="设置描述"
+                android:textColor="#fff"
+                android:layout_alignParentRight="true"
+                android:textSize="10sp"
+                android:gravity="center"/>
+        </RelativeLayout>
     </LinearLayout>
 
 </RelativeLayout>

@@ -1,5 +1,6 @@
 package com.jim.weather.receiver;
 
+import com.jim.weather.service.AutoUpdateService;
 import com.jim.weather.utiles.Logger;
 
 import android.content.BroadcastReceiver;
@@ -14,6 +15,8 @@ public class BootReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		// TODO Auto-generated method stub
 		Logger.i(tag, "¿ª»úÆô¶¯");
+		Intent service = new Intent(context, AutoUpdateService.class);
+		context.startService(service);
 	}
 
 }

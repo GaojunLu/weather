@@ -24,6 +24,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,6 +39,7 @@ import com.jeremyfeinstein.slidingmenu.lib.app.SlidingActivity;
 import com.jim.weather.R;
 import com.jim.weather.bean.WeatherInfo;
 import com.jim.weather.global.URL;
+import com.jim.weather.service.AutoUpdateService;
 import com.jim.weather.utiles.Baidu2Hefeng;
 import com.jim.weather.utiles.DbUtiles;
 import com.jim.weather.utiles.JsonToBean;
@@ -57,11 +59,10 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 	private String county;
 	private String city;
 	private TextView tv_title;
-	private LinearLayout setting_changecounty;
+	private RelativeLayout setting_changecounty;
 	private SlidingMenu slidingMenu;
 	private ImageView iv_menu;
 	private PopupWindow popupWindow;
-	private LinearLayout popView;
 	private TextView tv_auto;
 	private TextView tv_choise;
 	private LocationClient mLocationClient;
@@ -91,7 +92,8 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 	private ImageView iv_refresh;
 	private TextView tv_updatetime;
 	private RotateAnimation rotate;
-	
+	private RelativeLayout setting_autoupdate;
+	private LinearLayout popView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -109,6 +111,7 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 		setting_changecounty.setOnClickListener(this);
 		iv_menu.setOnClickListener(this);
 		iv_refresh.setOnClickListener(this);
+		setting_autoupdate.setOnClickListener(this);
 	}
 
 	private void initView() {
@@ -117,21 +120,23 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 		tv_next.add((TextView) findViewById(R.id.tv_next1));
 		tv_next.add((TextView) findViewById(R.id.tv_next2));
 		tv_next.add((TextView) findViewById(R.id.tv_next3));
-		setting_changecounty = (LinearLayout) findViewById(R.id.setting_changecounty);
+		setting_changecounty = (RelativeLayout) findViewById(R.id.setting_changecounty);
+		setting_autoupdate = (RelativeLayout) findViewById(R.id.setting_autoupdate);
 		iv_menu = (ImageView) findViewById(R.id.iv_menu);
 		iv_refresh = (ImageView) findViewById(R.id.iv_refresh);
 		tv_updatetime = (TextView) findViewById(R.id.tv_updatetime);
 		// 侧边栏
 		slidingMenu = getSlidingMenu();
-		slidingMenu.setBehindOffset(getWindowManager().getDefaultDisplay().getWidth()/3);
+		slidingMenu.setBehindOffset(getWindowManager().getDefaultDisplay()
+				.getWidth() / 3);
 		slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
 		slidingMenu.setMode(SlidingMenu.LEFT);
-		// 气泡
-		popupWindow = new PopupWindow(this);
+
 	}
 
 	public void initData() {
-		rotate = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		rotate = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f,
+				Animation.RELATIVE_TO_SELF, 0.5f);
 		rotate.setDuration(300);
 		rotate.setRepeatMode(Animation.RESTART);
 		rotate.setRepeatCount(Animation.INFINITE);
@@ -203,8 +208,12 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 			public void onSuccess(ResponseInfo<String> responseInfo) {
 				StringUtils.saveJson(MainActivity.this, cityid,
 						responseInfo.result);
-				getSharedPreferences("config", MODE_PRIVATE).edit()
-						.putString("updatetime", (String) DateFormat.format("MM月dd日 HH:mm", System.currentTimeMillis())).commit();
+				getSharedPreferences("config", MODE_PRIVATE)
+						.edit()
+						.putString(
+								"updatetime",
+								(String) DateFormat.format("MM月dd日 HH:mm",
+										System.currentTimeMillis())).commit();
 				upDateUI(responseInfo.result);
 				Logger.i(TAG, "从网络读取数据");
 				Toast.makeText(MainActivity.this, "更新成功", 0).show();
@@ -238,7 +247,8 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 							+ daily_forecast.tmp.min + "~"
 							+ daily_forecast.tmp.max + "°C");
 		}
-		tv_updatetime.setText(getSharedPreferences("config", MODE_PRIVATE).getString("updatetime", "未更新"));
+		tv_updatetime.setText(getSharedPreferences("config", MODE_PRIVATE)
+				.getString("updatetime", "未更新"));
 		iv_refresh.clearAnimation();
 	}
 
@@ -260,10 +270,13 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
 		case R.id.tv_title:// 标题栏的点击
-			showPop4Choise(tv_title);
+			showPop4ChoiseCity(tv_title);
 			break;
 		case R.id.setting_changecounty:// 菜单切换城市的点击
-			showPop4Choise(setting_changecounty);
+			showPop4ChoiseCity(setting_changecounty);
+			break;
+		case R.id.setting_autoupdate:// 菜单自动更新点击
+			showPop4SetAutoUpdate(setting_autoupdate);
 			break;
 		case R.id.iv_menu:// 显示、收起侧边栏
 			slidingMenu.toggle();
@@ -282,14 +295,35 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 			popupWindow.dismiss();
 			getCity();
 			break;
-		case R.id.iv_refresh://手动刷新
-			if(city!=null&&county!=null){
+		case R.id.iv_refresh:// 手动刷新
+			if (city != null && county != null) {
 				upDateWeatherInfoOnline(city, county);
 				iv_refresh.setAnimation(rotate);
 				iv_refresh.startAnimation(rotate);
-			}else{
+			} else {
 				getCity();
 			}
+			break;
+		// 以下设置自动更新气泡的按钮
+		case R.id.tv_off:
+			stopService(new Intent(MainActivity.this, AutoUpdateService.class));
+			popupWindow.dismiss();
+			break;
+		case R.id.tv_1h:
+			startService(new Intent(MainActivity.this, AutoUpdateService.class));
+			popupWindow.dismiss();
+			break;
+		case R.id.tv_3h:
+			startService(new Intent(MainActivity.this, AutoUpdateService.class));
+			popupWindow.dismiss();
+			break;
+		case R.id.tv_6h:
+			startService(new Intent(MainActivity.this, AutoUpdateService.class));
+			popupWindow.dismiss();
+			break;
+		case R.id.tv_12h:
+			startService(new Intent(MainActivity.this, AutoUpdateService.class));
+			popupWindow.dismiss();
 			break;
 		}
 	}
@@ -313,28 +347,70 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 	 * @param v
 	 *            将要挂载在v的下方
 	 */
-	public void showPop4Choise(View v) {
-		if (popView == null) {
-			popView = (LinearLayout) View.inflate(this, R.layout.pop4choise,
-					null);
-			tv_auto = (TextView) popView.findViewById(R.id.tv_auto);
-			tv_choise = (TextView) popView.findViewById(R.id.tv_choise);
-			tv_auto.setOnClickListener(this);
-			tv_choise.setOnClickListener(this);
-		}
+	public void showPop4ChoiseCity(View v) {
+		popView = (LinearLayout) View.inflate(this, R.layout.pop4choise_city,
+				null);
+		tv_auto = (TextView) popView.findViewById(R.id.tv_auto);
+		tv_choise = (TextView) popView.findViewById(R.id.tv_choise);
+		tv_auto.setOnClickListener(this);
+		tv_choise.setOnClickListener(this);
+		popupWindow = new PopupWindow(this);
 		popupWindow.setContentView(popView);
 		popupWindow.setWidth(-2);
 		popupWindow.setHeight(-2);
 		popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 		popupWindow.setFocusable(true);
 		popupWindow.showAsDropDown(v, 0, 0);
+		popupWindow.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss() {
+				// TODO Auto-generated method stub
+				popupWindow = null;
+				popView = null;
+			}
+		});
+	}
+
+	/**
+	 * 设置自动更新的pop
+	 */
+	public void showPop4SetAutoUpdate(View v) {
+		popView = (LinearLayout) View.inflate(this,
+				R.layout.pop4set_autoupdate, null);
+		TextView tv_off = (TextView) popView.findViewById(R.id.tv_off);
+		TextView tv_1h = (TextView) popView.findViewById(R.id.tv_1h);
+		TextView tv_3h = (TextView) popView.findViewById(R.id.tv_3h);
+		TextView tv_6h = (TextView) popView.findViewById(R.id.tv_6h);
+		TextView tv_12h = (TextView) popView.findViewById(R.id.tv_12h);
+		tv_off.setOnClickListener(this);
+		tv_1h.setOnClickListener(this);
+		tv_3h.setOnClickListener(this);
+		tv_6h.setOnClickListener(this);
+		tv_12h.setOnClickListener(this);
+		popupWindow = new PopupWindow(this);
+		popupWindow.setContentView(popView);
+		popupWindow.setWidth(-2);
+		popupWindow.setHeight(-2);
+		popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+		popupWindow.setFocusable(true);
+		popupWindow.showAsDropDown(v, 0, 0);
+		popupWindow.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss() {
+				// TODO Auto-generated method stub
+				popupWindow = null;
+				popView = null;
+			}
+		});
 	}
 
 	@Override
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
-		if (popupWindow.isShowing()) {
+		if (popupWindow!=null&&popupWindow.isShowing()) {
 			popupWindow.dismiss();
 			popupWindow = null;
 		}

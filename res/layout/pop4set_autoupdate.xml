@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="50dp"
+    android:orientation="horizontal"
+    android:background="@drawable/popup_inline_error_am"
+    android:gravity="center_vertical" >
+
+    <TextView
+        android:id="@+id/tv_off"
+        android:clickable="true"
+        android:background="@drawable/setting_bg"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:text="关闭"
+        android:gravity="center" />
+    <View
+        android:layout_width="1dp"
+        android:layout_height="20dp"
+        android:layout_centerHorizontal="true"
+        android:background="#aa000000" 
+        android:gravity="center" />
+
+
+    <TextView
+        android:id="@+id/tv_1h"
+        android:clickable="true"
+        android:background="@drawable/setting_bg"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:text="1小时" 
+        android:gravity="center" />
+    <View
+        android:layout_width="1dp"
+        android:layout_height="20dp"
+        android:layout_centerHorizontal="true"
+        android:background="#aa000000" 
+        android:gravity="center" />
+
+
+    <TextView
+        android:id="@+id/tv_3h"
+        android:clickable="true"
+        android:background="@drawable/setting_bg"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:text="3小时" 
+        android:gravity="center" />
+    <View
+        android:layout_width="1dp"
+        android:layout_height="20dp"
+        android:layout_centerHorizontal="true"
+        android:background="#aa000000" 
+        android:gravity="center" />
+
+
+    <TextView
+        android:id="@+id/tv_6h"
+        android:clickable="true"
+        android:background="@drawable/setting_bg"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:text="6小时" 
+        android:gravity="center" />
+    <View
+        android:layout_width="1dp"
+        android:layout_height="20dp"
+        android:layout_centerHorizontal="true"
+        android:background="#aa000000" 
+        android:gravity="center" />
+
+
+    <TextView
+        android:id="@+id/tv_12h"
+        android:clickable="true"
+        android:background="@drawable/setting_bg"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:text="12小时" 
+        android:gravity="center" />
+
+</LinearLayout>

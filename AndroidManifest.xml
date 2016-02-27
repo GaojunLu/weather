@@ -67,6 +67,8 @@
                 <category android:name="android.intent.category.HOME" />
             </intent-filter>
         </receiver>
+        
+        <service android:name="com.jim.weather.service.AutoUpdateService"></service>
 
         <!-- 百度地图定位 -->
         <service
