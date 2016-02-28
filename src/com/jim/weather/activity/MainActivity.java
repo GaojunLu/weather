@@ -151,7 +151,8 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 		city = getSharedPreferences("config", MODE_PRIVATE).getString("city",
 				null);
 		upDateWeatherInfoFromSD(city, county);
-		switch (getSharedPreferences("config", MODE_PRIVATE).getInt("autoupdate", 0)) {
+		switch (getSharedPreferences("config", MODE_PRIVATE).getInt(
+				"autoupdate", 0)) {
 		case 0:
 			tv_autoupdate_desc.setText("关闭");
 			break;
@@ -168,12 +169,12 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 			tv_autoupdate_desc.setText("12小时");
 			break;
 		}
-		//注册更新广播
-		
+		// 注册更新广播
+
 		autoUpdateReciever = new AutoUpdateReciever();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("com.jim.weather.autoupdate");
-		registerReceiver(autoUpdateReciever, filter );
+		registerReceiver(autoUpdateReciever, filter);
 	}
 
 	/**
@@ -264,17 +265,22 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 	 */
 	public void upDateUI(String result) {
 		weatherInfo = JsonToBean.getWeatherInfo(result);
+		if (!"ok".equalsIgnoreCase(weatherInfo.status)) {// 有时得不到正确信息
+			Toast.makeText(MainActivity.this, "请试试手动刷新", 0).show();
+			return;
+		}
 		tv_title.setText(weatherInfo.basic.city);
 		tv_now.setText(weatherInfo.now.cond.txt + "\n" + weatherInfo.now.tmp
 				+ "°C");
 		for (int i = 0; i < tv_next.size(); i++) {
 			WeatherInfo.Daily_forecast daily_forecast = weatherInfo.daily_forecast
 					.get(i + 1);
-			tv_next.get(i).setText(
-					daily_forecast.cond.txt_d + "\\"
-							+ daily_forecast.cond.txt_n + "\n"
-							+ daily_forecast.tmp.min + "~"
-							+ daily_forecast.tmp.max + "°C");
+			StringBuilder builder = new StringBuilder();
+			builder.append(daily_forecast.date.substring(5)+"\n");
+			builder.append(daily_forecast.cond.txt_d + "\\"
+					+ daily_forecast.cond.txt_n + "\n" + daily_forecast.tmp.min
+					+ "~" + daily_forecast.tmp.max + "°C");
+			tv_next.get(i).setText(builder.toString());
 		}
 		tv_updatetime.setText(getSharedPreferences("config", MODE_PRIVATE)
 				.getString("updatetime", "未更新"));
@@ -335,35 +341,40 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 			break;
 		// 以下设置自动更新气泡的按钮
 		case R.id.tv_off:
-			getSharedPreferences("config", MODE_PRIVATE).edit().putInt("autoupdate", 0).commit();
+			getSharedPreferences("config", MODE_PRIVATE).edit()
+					.putInt("autoupdate", 0).commit();
 			stopService(new Intent(MainActivity.this, AutoUpdateService.class));
 			popupWindow.dismiss();
 			slidingMenu.toggle();
 			tv_autoupdate_desc.setText("关闭");
 			break;
 		case R.id.tv_1h:
-			getSharedPreferences("config", MODE_PRIVATE).edit().putInt("autoupdate", 1).commit();
+			getSharedPreferences("config", MODE_PRIVATE).edit()
+					.putInt("autoupdate", 1).commit();
 			startService(new Intent(MainActivity.this, AutoUpdateService.class));
 			popupWindow.dismiss();
 			slidingMenu.toggle();
 			tv_autoupdate_desc.setText("1小时");
 			break;
 		case R.id.tv_3h:
-			getSharedPreferences("config", MODE_PRIVATE).edit().putInt("autoupdate", 3).commit();
+			getSharedPreferences("config", MODE_PRIVATE).edit()
+					.putInt("autoupdate", 3).commit();
 			startService(new Intent(MainActivity.this, AutoUpdateService.class));
 			popupWindow.dismiss();
 			slidingMenu.toggle();
 			tv_autoupdate_desc.setText("3小时");
 			break;
 		case R.id.tv_6h:
-			getSharedPreferences("config", MODE_PRIVATE).edit().putInt("autoupdate", 6).commit();
+			getSharedPreferences("config", MODE_PRIVATE).edit()
+					.putInt("autoupdate", 6).commit();
 			startService(new Intent(MainActivity.this, AutoUpdateService.class));
 			popupWindow.dismiss();
 			slidingMenu.toggle();
 			tv_autoupdate_desc.setText("6小时");
 			break;
 		case R.id.tv_12h:
-			getSharedPreferences("config", MODE_PRIVATE).edit().putInt("autoupdate", 12).commit();
+			getSharedPreferences("config", MODE_PRIVATE).edit()
+					.putInt("autoupdate", 12).commit();
 			startService(new Intent(MainActivity.this, AutoUpdateService.class));
 			popupWindow.dismiss();
 			slidingMenu.toggle();
@@ -454,7 +465,7 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
-		if (popupWindow!=null&&popupWindow.isShowing()) {
+		if (popupWindow != null && popupWindow.isShowing()) {
 			popupWindow.dismiss();
 			popupWindow = null;
 		}
@@ -517,12 +528,14 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 					.putString("city", city).commit();
 		}
 	}
+
 	/**
 	 * 接收更新广播
+	 * 
 	 * @author Administrator
 	 *
 	 */
-	class AutoUpdateReciever extends BroadcastReceiver{
+	class AutoUpdateReciever extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -530,6 +543,6 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 			upDateWeatherInfoFromSD(city, county);
 			Toast.makeText(MainActivity.this, "完成了自动更新", 0).show();
 		}
-		
+
 	}
 }
