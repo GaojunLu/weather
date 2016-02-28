@@ -43,8 +43,10 @@ import com.jim.weather.R;
 import com.jim.weather.bean.WeatherInfo;
 import com.jim.weather.global.URL;
 import com.jim.weather.service.AutoUpdateService;
+import com.jim.weather.service.NotificationService;
 import com.jim.weather.utiles.Baidu2Hefeng;
 import com.jim.weather.utiles.DbUtiles;
+import com.jim.weather.utiles.ImageUtiles;
 import com.jim.weather.utiles.JsonToBean;
 import com.jim.weather.utiles.Logger;
 import com.jim.weather.utiles.StringUtils;
@@ -99,6 +101,9 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 	private LinearLayout popView;
 	private AutoUpdateReciever autoUpdateReciever;
 	private TextView tv_autoupdate_desc;
+	private ImageView iv_now_icon;
+	private RelativeLayout setting_notification;
+	private TextView tv_notification_desc;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -117,6 +122,8 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 		iv_menu.setOnClickListener(this);
 		iv_refresh.setOnClickListener(this);
 		setting_autoupdate.setOnClickListener(this);
+		setting_notification.setOnClickListener(this);
+		tv_notification_desc.setOnClickListener(this);
 	}
 
 	private void initView() {
@@ -131,6 +138,9 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 		iv_refresh = (ImageView) findViewById(R.id.iv_refresh);
 		tv_updatetime = (TextView) findViewById(R.id.tv_updatetime);
 		tv_autoupdate_desc = (TextView) findViewById(R.id.tv_autoupdate_desc);
+		iv_now_icon = (ImageView) findViewById(R.id.iv_now_icon);
+		setting_notification = (RelativeLayout) findViewById(R.id.setting_notification);
+		tv_notification_desc = (TextView) findViewById(R.id.tv_notification_desc);
 		// 侧边栏
 		slidingMenu = getSlidingMenu();
 		slidingMenu.setBehindOffset(getWindowManager().getDefaultDisplay()
@@ -200,6 +210,7 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 					String result = StringUtils.getStringByInputStream(fis);
 					upDateUI(result);
 					Logger.i(TAG, "从本地读取数据");
+					return true;
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -272,6 +283,7 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 		tv_title.setText(weatherInfo.basic.city);
 		tv_now.setText(weatherInfo.now.cond.txt + "\n" + weatherInfo.now.tmp
 				+ "°C");
+		iv_now_icon.setBackgroundDrawable((ImageUtiles.getDrawableIconByWeathercode(MainActivity.this, weatherInfo.now.cond.code)));
 		for (int i = 0; i < tv_next.size(); i++) {
 			WeatherInfo.Daily_forecast daily_forecast = weatherInfo.daily_forecast
 					.get(i + 1);
@@ -379,6 +391,11 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 			popupWindow.dismiss();
 			slidingMenu.toggle();
 			tv_autoupdate_desc.setText("12小时");
+			stopService(new Intent(MainActivity.this, NotificationService.class));
+			break;
+		//通知栏
+		case R.id.setting_notification:
+			startService(new Intent(MainActivity.this, NotificationService.class));
 			break;
 		}
 	}
@@ -544,5 +561,11 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 			Toast.makeText(MainActivity.this, "完成了自动更新", 0).show();
 		}
 
+	}
+	
+	@Override
+	public void overridePendingTransition(int enterAnim, int exitAnim) {
+		// TODO Auto-generated method stub
+		super.overridePendingTransition(0, 0);
 	}
 }

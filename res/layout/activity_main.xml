@@ -47,12 +47,19 @@
         android:layout_centerInParent="true"
         android:text="当前天气"
         android:textSize="30sp" />
+    
+    <ImageView 
+        android:id="@+id/iv_now_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_now"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:orientation="horizontal" >
+        android:orientation="horizontal" 
+        android:layout_centerHorizontal="true">
 
         <TextView
             android:id="@+id/tv_next1"

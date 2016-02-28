@@ -70,6 +70,36 @@
                 android:textSize="10sp"
                 android:gravity="center"/>
         </RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/setting_notification"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:background="@drawable/setting_bg"
+            android:gravity="center_vertical"
+            android:clickable="true">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_menu_notifications" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="通知栏显示天气"
+                android:textColor="#fff" 
+                android:textSize="16sp"/>
+            <TextView 
+                android:id="@+id/tv_notification_desc"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="设置描述"
+                android:textColor="#fff"
+                android:layout_alignParentRight="true"
+                android:textSize="10sp"
+                android:gravity="center"/>
+        </RelativeLayout>
     </LinearLayout>
 
 </RelativeLayout>
