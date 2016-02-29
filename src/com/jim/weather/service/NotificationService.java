@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 import com.jim.weather.R;
+import com.jim.weather.activity.MainActivity;
 import com.jim.weather.bean.WeatherInfo;
 import com.jim.weather.utiles.DbUtiles;
 import com.jim.weather.utiles.ImageUtiles;
@@ -16,12 +17,15 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.IBinder;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 public class NotificationService extends Service {
 
@@ -29,6 +33,7 @@ public class NotificationService extends Service {
 	private Notification notification;
 	private String county;
 	private String city;
+	private AutoUpdateReciever autoUpdateReciever;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -44,10 +49,15 @@ public class NotificationService extends Service {
 		getWeatherInfoFromSD();
 		Logger.i(this.getClass().getSimpleName(), "通知栏服务onCreate");
 		// 注册广播接收更新通知
+		autoUpdateReciever = new AutoUpdateReciever();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction("com.jim.weather.autoupdate");
+		registerReceiver(autoUpdateReciever, filter);
 	}
-/**
- * 从本地获取数据并显示到通知栏
- */
+
+	/**
+	 * 从本地获取数据并显示到通知栏
+	 */
 	public void getWeatherInfoFromSD() {
 		county = getSharedPreferences("config", MODE_PRIVATE).getString(
 				"county", null);
@@ -91,10 +101,10 @@ public class NotificationService extends Service {
 					+ "°C");
 			remoteViews.setTextViewText(R.id.tv_weather,
 					weatherInfo.now.cond.txt);
-			remoteViews.setTextViewText(
-					R.id.tv_updatetime,
-					"更新于"+getSharedPreferences("config", MODE_PRIVATE).getString(
-							"updatetime", "未更新"));
+			remoteViews.setTextViewText(R.id.tv_updatetime,
+					"更新于"
+							+ getSharedPreferences("config", MODE_PRIVATE)
+									.getString("updatetime", "未更新"));
 			remoteViews.setImageViewBitmap(R.id.iv_weather_icon, ImageUtiles
 					.getBitmapIconByWeathercode(NotificationService.this,
 							weatherInfo.now.cond.code));
@@ -105,7 +115,8 @@ public class NotificationService extends Service {
 			Intent intent = new Intent();
 			intent.setAction("com.jim.weather.splash");
 			intent.addCategory(Intent.CATEGORY_DEFAULT);
-			notification.contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+			notification.contentIntent = PendingIntent.getActivity(this, 0,
+					intent, PendingIntent.FLAG_CANCEL_CURRENT);
 			manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 			manager.notify(0, notification);
 		}
@@ -122,7 +133,28 @@ public class NotificationService extends Service {
 		// TODO Auto-generated method stub
 		super.onDestroy();
 		manager.cancel(0);
+		manager.cancelAll();
+		unregisterReceiver(autoUpdateReciever);
+		getSharedPreferences("config", MODE_PRIVATE).edit()
+				.putBoolean("shownotification", false).commit(); 
 		Logger.i(this.getClass().getSimpleName(), "通知栏服务onDestroy");
+	}
+	
+	/**
+	 * 接收更新广播，收到后更新
+	 * 
+	 * @author Administrator
+	 *
+	 */
+	class AutoUpdateReciever extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			getWeatherInfoFromSD();
+			Logger.i(getClass().getSimpleName(), "通知栏收到更新广播");
+		}
+
 	}
 
 }

@@ -7,10 +7,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -179,6 +182,18 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 			tv_autoupdate_desc.setText("12小时");
 			break;
 		}
+		//检查通知服务是否在运行，决定显示开启还是关闭
+		ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		List<RunningServiceInfo> runningServices = manager
+				.getRunningServices(100);
+		tv_notification_desc.setText("关闭");
+		for (RunningServiceInfo runningServiceInfo : runningServices) {
+			if (runningServiceInfo.service.getClassName().equals(
+					"com.jim.weather.service.NotificationService")) {
+				tv_notification_desc.setText("开启");
+				break;
+			}
+		}
 		// 注册更新广播
 
 		autoUpdateReciever = new AutoUpdateReciever();
@@ -255,9 +270,13 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 								"updatetime",
 								(String) DateFormat.format("MM月dd日 HH:mm:ss",
 										System.currentTimeMillis())).commit();
-				upDateUI(responseInfo.result);
 				Logger.i(TAG, "从网络读取数据");
-				Toast.makeText(MainActivity.this, "更新成功", 0).show();
+//				upDateUI(responseInfo.result);
+//				Toast.makeText(MainActivity.this, "更新成功", 0).show();
+				//发送更新广播
+				Intent intent = new Intent();
+				intent.setAction("com.jim.weather.autoupdate");
+				sendBroadcast(intent);
 			}
 
 			@Override
@@ -283,12 +302,14 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 		tv_title.setText(weatherInfo.basic.city);
 		tv_now.setText(weatherInfo.now.cond.txt + "\n" + weatherInfo.now.tmp
 				+ "°C");
-		iv_now_icon.setBackgroundDrawable((ImageUtiles.getDrawableIconByWeathercode(MainActivity.this, weatherInfo.now.cond.code)));
+		iv_now_icon.setBackgroundDrawable((ImageUtiles
+				.getDrawableIconByWeathercode(MainActivity.this,
+						weatherInfo.now.cond.code)));
 		for (int i = 0; i < tv_next.size(); i++) {
 			WeatherInfo.Daily_forecast daily_forecast = weatherInfo.daily_forecast
 					.get(i + 1);
 			StringBuilder builder = new StringBuilder();
-			builder.append(daily_forecast.date.substring(5)+"\n");
+			builder.append(daily_forecast.date.substring(5) + "\n");
 			builder.append(daily_forecast.cond.txt_d + "\\"
 					+ daily_forecast.cond.txt_n + "\n" + daily_forecast.tmp.min
 					+ "~" + daily_forecast.tmp.max + "°C");
@@ -391,11 +412,27 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 			popupWindow.dismiss();
 			slidingMenu.toggle();
 			tv_autoupdate_desc.setText("12小时");
-			stopService(new Intent(MainActivity.this, NotificationService.class));
 			break;
-		//通知栏
+		// 通知栏
 		case R.id.setting_notification:
-			startService(new Intent(MainActivity.this, NotificationService.class));
+			showPop4SetNotification(v);
+			break;
+		case R.id.tv_notifiation_on:
+			getSharedPreferences("config", MODE_PRIVATE).edit()
+					.putBoolean("shownotification", true).commit();
+			startService(new Intent(MainActivity.this,
+					NotificationService.class));
+			slidingMenu.toggle();
+			popupWindow.dismiss();
+			tv_notification_desc.setText("开启");
+			break;
+		case R.id.tv_notifiation_off:
+			getSharedPreferences("config", MODE_PRIVATE).edit()
+					.putBoolean("shownotification", false).commit();
+			stopService(new Intent(MainActivity.this, NotificationService.class));
+			slidingMenu.toggle();
+			popupWindow.dismiss();
+			tv_notification_desc.setText("关闭");
 			break;
 		}
 	}
@@ -460,6 +497,38 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 		tv_3h.setOnClickListener(this);
 		tv_6h.setOnClickListener(this);
 		tv_12h.setOnClickListener(this);
+		popupWindow = new PopupWindow(this);
+		popupWindow.setContentView(popView);
+		popupWindow.setWidth(-2);
+		popupWindow.setHeight(-2);
+		popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+		popupWindow.setFocusable(true);
+		popupWindow.showAsDropDown(v, 0, 0);
+		popupWindow.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss() {
+				// TODO Auto-generated method stub
+				popupWindow = null;
+				popView = null;
+			}
+		});
+	}
+
+	/**
+	 * 设置通知栏显示的pop
+	 * 
+	 * @param v
+	 */
+	public void showPop4SetNotification(View v) {
+		popView = (LinearLayout) View.inflate(this,
+				R.layout.pop4set_notification, null);
+		TextView tv_notifiation_off = (TextView) popView
+				.findViewById(R.id.tv_notifiation_off);
+		TextView tv_notifiation_on = (TextView) popView
+				.findViewById(R.id.tv_notifiation_on);
+		tv_notifiation_off.setOnClickListener(this);
+		tv_notifiation_on.setOnClickListener(this);
 		popupWindow = new PopupWindow(this);
 		popupWindow.setContentView(popView);
 		popupWindow.setWidth(-2);
@@ -558,14 +627,9 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub
 			upDateWeatherInfoFromSD(city, county);
-			Toast.makeText(MainActivity.this, "完成了自动更新", 0).show();
+			Toast.makeText(MainActivity.this, "已更新", 0).show();
 		}
 
 	}
-	
-	@Override
-	public void overridePendingTransition(int enterAnim, int exitAnim) {
-		// TODO Auto-generated method stub
-		super.overridePendingTransition(0, 0);
-	}
+
 }

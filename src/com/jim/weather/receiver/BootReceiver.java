@@ -1,6 +1,7 @@
 package com.jim.weather.receiver;
 
 import com.jim.weather.service.AutoUpdateService;
+import com.jim.weather.service.NotificationService;
 import com.jim.weather.utiles.Logger;
 
 import android.content.BroadcastReceiver;
@@ -17,6 +18,10 @@ public class BootReceiver extends BroadcastReceiver {
 		Logger.i(tag, "¿ª»úÆô¶¯");
 		if (context.getSharedPreferences("config", Context.MODE_PRIVATE).getInt("autoupdate", 0)!=0) {
 			Intent service = new Intent(context, AutoUpdateService.class);
+			context.startService(service);
+		}
+		if (context.getSharedPreferences("config", Context.MODE_PRIVATE).getBoolean("shownotification", false)) {
+			Intent service = new Intent(context, NotificationService.class);
 			context.startService(service);
 		}
 	}
