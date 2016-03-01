@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="300dip"
-    android:layout_height="50dip" >
+    android:layout_height="55dip"  >
 
     <ImageView
         android:id="@+id/iv_logo"
@@ -28,16 +28,25 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:text="广州" />
+                android:text="城市"/>
+            
+            <ImageView 
+                android:id="@+id/iv_refresh"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_toRightOf="@id/tv_county"
+                android:layout_marginLeft="10dp"
+                android:clickable="true"
+                android:src="@drawable/ic_menu_refresh"/>
 
             <TextView
                 android:id="@+id/tv_updatetime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
+                android:layout_marginRight="50dp"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="5dp"
-                android:text="更新时间    00:00"
+                android:text="X月X日 00:00"
                 android:textSize="10sp" />
         </RelativeLayout>
 
@@ -51,7 +60,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:text="13°C"
+                android:text="°C"
                 android:textSize="18sp" />
 
             <ImageView
@@ -69,7 +78,7 @@
                 android:layout_height="match_parent"
                 android:layout_toRightOf="@id/iv_weather_icon"
                 android:gravity="center"
-                android:text="雷阵雨伴有冰雹"
+                android:text="还没有数据"
                 android:textSize="18sp" />
         </RelativeLayout>
     </LinearLayout>

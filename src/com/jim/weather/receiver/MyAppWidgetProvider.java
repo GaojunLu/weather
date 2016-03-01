@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 
 import com.jim.weather.R;
 import com.jim.weather.bean.WeatherInfo;
+import com.jim.weather.service.UpdateService;
 import com.jim.weather.utiles.DbUtiles;
 import com.jim.weather.utiles.ImageUtiles;
 import com.jim.weather.utiles.JsonToBean;
@@ -72,30 +73,26 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
 					Logger.i(getClass().getSimpleName(), "控件从本地读取数据");
 					WeatherInfo weatherInfo = JsonToBean.getWeatherInfo(result);
 					if ("ok".equalsIgnoreCase(weatherInfo.status)) {
-						Intent intent = new Intent();
+						Intent intent = new Intent(context, UpdateService.class);
 						PendingIntent pendingIntent = PendingIntent
-								.getActivity(context, 0, intent, 0);
+								.getService(context, 0, intent, 0);
 						RemoteViews remoteViews = new RemoteViews(
-								context.getPackageName(), R.layout.notification);
+								context.getPackageName(), R.layout.widget);
 						remoteViews.setTextViewText(R.id.tv_county,
 								weatherInfo.basic.city);
 						remoteViews.setTextViewText(R.id.tv_temp,
 								weatherInfo.now.tmp + "°C");
 						remoteViews.setTextViewText(R.id.tv_weather,
 								weatherInfo.now.cond.txt);
-						remoteViews
-								.setTextViewText(
-										R.id.tv_updatetime,
-										"更新于"
-												+ context.getSharedPreferences(
-														"config",
-														Context.MODE_PRIVATE)
-														.getString(
-																"updatetime",
-																"未更新"));
+						remoteViews.setTextViewText(
+								R.id.tv_updatetime,
+								context.getSharedPreferences("config",
+										Context.MODE_PRIVATE).getString(
+										"updatetime", "未更新"));
 						remoteViews.setImageViewBitmap(R.id.iv_weather_icon,
 								ImageUtiles.getBitmapIconByWeathercode(context,
 										weatherInfo.now.cond.code));
+						remoteViews.setOnClickPendingIntent(R.id.iv_refresh, pendingIntent);
 						ComponentName componentName = new ComponentName(
 								context, MyAppWidgetProvider.class);
 						appWidgetManager.updateAppWidget(componentName,

@@ -47,6 +47,7 @@ import com.jim.weather.bean.WeatherInfo;
 import com.jim.weather.global.URL;
 import com.jim.weather.service.AutoUpdateService;
 import com.jim.weather.service.NotificationService;
+import com.jim.weather.service.UpdateService;
 import com.jim.weather.utiles.Baidu2Hefeng;
 import com.jim.weather.utiles.DbUtiles;
 import com.jim.weather.utiles.ImageUtiles;
@@ -216,7 +217,7 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 		} else {
 			File file = new File(getFilesDir(), cityid + ".json");
 			if (!file.exists()) {// 本地没有信息，就从网络获取
-				upDateWeatherInfoOnline(city, county);
+				upDateWeatherInfoOnline();
 			} else {
 				FileInputStream fis;
 				try {
@@ -233,57 +234,11 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 		}
 		return false;
 	}
-
-	/**
-	 * 根据市、县，从网络更新天气信息
-	 * 
-	 * @param city
-	 * @param county
-	 */
-	public void upDateWeatherInfoOnline(String city, String county) {
-		if (county == null || county.equals("null")) {
-			getCity();
-			return;
-		}
-		final String cityid = DbUtiles.getCityid(this, city, county);
-		if (cityid == null) {
-			Toast.makeText(MainActivity.this, "自动获取地址失败，请手动选择", 0).show();
-			getSharedPreferences("config", MODE_PRIVATE).edit()
-					.putString("county", null).commit();
-			getSharedPreferences("config", MODE_PRIVATE).edit()
-					.putString("city", null).commit();
-			return;
-		}
-		HttpUtils httpUtils = new HttpUtils();
-		String url = URL.WEATHER_URL + "?cityid=" + cityid + "&key="
-				+ URL.key_weather;
-		httpUtils.send(HttpMethod.GET, url, new RequestCallBack<String>() {
-
-			@Override
-			public void onSuccess(ResponseInfo<String> responseInfo) {
-				StringUtils.saveJson(MainActivity.this, cityid,
-						responseInfo.result);
-				getSharedPreferences("config", MODE_PRIVATE)
-						.edit()
-						.putString(
-								"updatetime",
-								(String) DateFormat.format("MM月dd日 HH:mm:ss",
-										System.currentTimeMillis())).commit();
-				Logger.i(TAG, "从网络读取数据");
-//				upDateUI(responseInfo.result);
-//				Toast.makeText(MainActivity.this, "更新成功", 0).show();
-				//发送更新广播
-				Intent intent = new Intent();
-				intent.setAction("com.jim.weather.autoupdate");
-				sendBroadcast(intent);
-			}
-
-			@Override
-			public void onFailure(HttpException e, String s) {
-				Toast.makeText(MainActivity.this, "更新失败，请检查网络设置", 0).show();
-				e.printStackTrace();
-			}
-		});
+/**
+ * 启动服务更新
+ */
+	public void upDateWeatherInfoOnline() {
+		startService(new Intent(this, UpdateService.class));
 	}
 
 	/**
@@ -364,7 +319,7 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 			break;
 		case R.id.iv_refresh:// 手动刷新
 			if (city != null && county != null) {
-				upDateWeatherInfoOnline(city, county);
+				upDateWeatherInfoOnline();
 				iv_refresh.setAnimation(rotate);
 				iv_refresh.startAnimation(rotate);
 			} else {
