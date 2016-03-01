@@ -53,6 +53,7 @@ import com.jim.weather.utiles.ImageUtiles;
 import com.jim.weather.utiles.JsonToBean;
 import com.jim.weather.utiles.Logger;
 import com.jim.weather.utiles.StringUtils;
+import com.jim.weather.utiles.TaskUtiles;
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
@@ -164,35 +165,33 @@ public class MainActivity extends SlidingActivity implements OnClickListener {
 		city = getSharedPreferences("config", MODE_PRIVATE).getString("city",
 				null);
 		upDateWeatherInfoFromSD(city, county);
-		switch (getSharedPreferences("config", MODE_PRIVATE).getInt(
-				"autoupdate", 0)) {
-		case 0:
+		if(TaskUtiles.isServiceRunning(this, "com.jim.weather.service.AutoUpdateService")){
+			switch (getSharedPreferences("config", MODE_PRIVATE).getInt(
+					"autoupdate", 0)) {
+					case 0:
+						tv_autoupdate_desc.setText("关闭");
+						break;
+					case 1:
+						tv_autoupdate_desc.setText("1小时");
+						break;
+					case 3:
+						tv_autoupdate_desc.setText("3小时");
+						break;
+					case 6:
+						tv_autoupdate_desc.setText("6小时");
+						break;
+					case 12:
+						tv_autoupdate_desc.setText("12小时");
+						break;
+			}
+		}else{
 			tv_autoupdate_desc.setText("关闭");
-			break;
-		case 1:
-			tv_autoupdate_desc.setText("1小时");
-			break;
-		case 3:
-			tv_autoupdate_desc.setText("3小时");
-			break;
-		case 6:
-			tv_autoupdate_desc.setText("6小时");
-			break;
-		case 12:
-			tv_autoupdate_desc.setText("12小时");
-			break;
 		}
 		//检查通知服务是否在运行，决定显示开启还是关闭
-		ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-		List<RunningServiceInfo> runningServices = manager
-				.getRunningServices(100);
-		tv_notification_desc.setText("关闭");
-		for (RunningServiceInfo runningServiceInfo : runningServices) {
-			if (runningServiceInfo.service.getClassName().equals(
-					"com.jim.weather.service.NotificationService")) {
-				tv_notification_desc.setText("开启");
-				break;
-			}
+		if(TaskUtiles.isServiceRunning(this, "com.jim.weather.service.NotificationService")){
+			tv_notification_desc.setText("开启");
+		}else{
+			tv_notification_desc.setText("关闭");
 		}
 		// 注册更新广播
 
